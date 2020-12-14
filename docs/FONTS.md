@@ -1,6 +1,6 @@
-## Dear ImGui: Using Fonts
+_(You may browse this at https://github.com/ocornut/imgui/blob/master/docs/FONTS.md or view this file with any Markdown viewer)_
 
-(You may browse this document at https://github.com/ocornut/imgui/blob/master/docs/FONTS.md or view this file with any Markdown viewer.)
+## Dear ImGui: Using Fonts
 
 The code in imgui.cpp embeds a copy of 'ProggyClean.ttf' (by Tristan Grimmer),
 a 13 pixels high, pixel-perfect font used by default. We embed it in the source code so you can use Dear ImGui without any file system access. ProggyClean does not scale smoothly, therefore it is recommended that you load your own file when using Dear ImGui in an application aiming to look nice and wanting to support multiple resolutions.
@@ -14,6 +14,7 @@ In the [misc/fonts/](https://github.com/ocornut/imgui/tree/master/misc/fonts) fo
 
 ## Index
 - [Readme First](#readme-first)
+- [How should I handle DPI in my application?](#how-should-i-handle-dpi-in-my-application)
 - [Fonts Loading Instructions](#font-loading-instructions)
 - [Using Icons](#using-icons)
 - [Using FreeType Rasterizer](#using-freetype-rasterizer)
@@ -43,6 +44,13 @@ u8"こんにちは"   // this will be encoded as UTF-8
 
 ##### [Return to Index](#index)
 
+## How should I handle DPI in my application?
+
+See [FAQ entry](https://github.com/ocornut/imgui/blob/master/docs/FAQ.md#q-how-should-i-handle-dpi-in-my-application).
+
+##### [Return to Index](#index)
+
+
 ## Font Loading Instructions
 
 **Load default font:**
@@ -51,12 +59,14 @@ ImGuiIO& io = ImGui::GetIO();
 io.Fonts->AddFontDefault();
 ```
 
+
 **Load .TTF/.OTF file with:**
 ```cpp
 ImGuiIO& io = ImGui::GetIO();
 io.Fonts->AddFontFromFileTTF("font.ttf", size_pixels);
 ```
 If you get an assert stating "Could not load font file!", your font filename is likely incorrect. Read "[About filenames](#about-filenames)" carefully.
+
 
 **Load multiple fonts:**
 ```cpp
@@ -65,11 +75,12 @@ ImFont* font1 = io.Fonts->AddFontFromFileTTF("font.ttf", size_pixels);
 ImFont* font2 = io.Fonts->AddFontFromFileTTF("anotherfont.otf", size_pixels);
 
 // Select font at runtime
-ImGui::Text("Hello");	// use the default font (which is the first loaded font)
+ImGui::Text("Hello"); // use the default font (which is the first loaded font)
 ImGui::PushFont(font2);
 ImGui::Text("Hello with another font");
 ImGui::PopFont();
 ```
+
 
 **For advanced options create a ImFontConfig structure and pass it to the AddFont() function (it will be copied internally):**
 ```cpp
@@ -79,6 +90,7 @@ config.OversampleV = 1;
 config.GlyphExtraSpacing.x = 1.0f;
 ImFont* font = io.Fonts->AddFontFromFileTTF("font.ttf", size_pixels, &config);
 ```
+
 
 **Combine multiple fonts into one:**
 ```cpp
@@ -97,6 +109,7 @@ io.Fonts->Build();
 ```
 
 **Add a fourth parameter to bake specific font ranges only:**
+
 ```cpp
 // Basic Latin, Extended Latin
 io.Fonts->AddFontFromFileTTF("font.ttf", size_pixels, NULL, io.Fonts->GetGlyphRangesDefault());
@@ -109,11 +122,25 @@ io.Fonts->AddFontFromFileTTF("font.ttf", size_pixels, NULL, io.Fonts->GetGlyphRa
 ```
 See [Using Custom Glyph Ranges](#using-custom-glyph-ranges) section to create your own ranges.
 
-**Offset font vertically by altering the `io.Font->DisplayOffset` value:**
+
+**Example loading and using a Japanese font:**
+
 ```cpp
-ImFont* font = io.Fonts->AddFontFromFileTTF("font.ttf", size_pixels);
-font->DisplayOffset.y = 1;   // Render 1 pixel down
+ImGuiIO& io = ImGui::GetIO();
+io.Fonts->AddFontFromFileTTF("NotoSansCJKjp-Medium.otf", 20.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
 ```
+```cpp
+ImGui::Text(u8"こんにちは！テスト %d", 123);
+if (ImGui::Button(u8"ロード"))
+{
+    // do stuff
+}
+ImGui::InputText("string", buf, IM_ARRAYSIZE(buf));
+ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
+```
+
+![sample code output](https://raw.githubusercontent.com/wiki/ocornut/imgui/web/v160/code_sample_02_jp.png)
+<br>_(settings: Dark style (left), Light style (right) / Font: NotoSansCJKjp-Medium, 20px / Rounding: 5)_
 
 **Font Atlas too large?**
 
@@ -130,6 +157,7 @@ Some solutions:
 3. Set `io.Fonts.TexDesiredWidth` to specify a texture width to minimize texture height (see comment in `ImFontAtlas::Build()` function).
 4. Set `io.Fonts.Flags |= ImFontAtlasFlags_NoPowerOfTwoHeight;` to disable rounding the texture height to the next power of two.
 5. Read about oversampling [here](https://github.com/nothings/stb/blob/master/tests/oversample).
+6. To support the extended range of unicode beyond 0xFFFF (e.g. emoticons, dingbats, symbols, shapes, ancient languages, etc...) add `#define IMGUI_USE_WCHAR32`in your `imconfig.h`
 
 ##### [Return to Index](#index)
 
@@ -199,7 +227,7 @@ io.Fonts->Build();                                     // Build the atlas while 
 
 ## Using Custom Colorful Icons
 
-**(This is a BETA api, use if you are familiar with dear imgui and with your rendering back-end)**
+**(This is a BETA api, use if you are familiar with dear imgui and with your rendering backend)**
 
 - You can use the `ImFontAtlas::AddCustomRect()` and `ImFontAtlas::AddCustomRectFontGlyph()` api to register rectangles that will be packed into the font atlas texture. Register them before building the atlas, then call Build()`.
 - You can then use `ImFontAtlas::GetCustomRectByIndex(int)` to query the position/size of your rectangle within the texture, and blit/copy any graphics data of your choice into those rectangles.
@@ -283,39 +311,31 @@ In some situations, you may also use `/` path separator under Windows.
 
 Some fonts files are available in the `misc/fonts/` folder:
 
-```
-Roboto-Medium.ttf
-  Apache License 2.0
-  by Christian Robetson
-  https://fonts.google.com/specimen/Roboto
+**Roboto-Medium.ttf**, by Christian Robetson
+<br>Apache License 2.0
+<br>https://fonts.google.com/specimen/Roboto
 
-Cousine-Regular.ttf
-  by Steve Matteson
-  Digitized data copyright (c) 2010 Google Corporation.
-  Licensed under the SIL Open Font License, Version 1.1
-  https://fonts.google.com/specimen/Cousine
+**Cousine-Regular.ttf**, by Steve Matteson
+<br>Digitized data copyright (c) 2010 Google Corporation. 
+<br>Licensed under the SIL Open Font License, Version 1.1
+<br>https://fonts.google.com/specimen/Cousine
 
-DroidSans.ttf
-  Copyright (c) Steve Matteson
-  Apache License, version 2.0
-  https://www.fontsquirrel.com/fonts/droid-sans
+**DroidSans.ttf**, by Steve Matteson
+<br>Apache License 2.0
+<br>https://www.fontsquirrel.com/fonts/droid-sans
 
-ProggyClean.ttf
-  Copyright (c) 2004, 2005 Tristan Grimmer
-  MIT License
-  recommended loading setting: Size = 13.0, DisplayOffset.Y = +1
-  http://www.proggyfonts.net/
+**ProggyClean.ttf**, by Tristan Grimmer
+<br>MIT License
+<br>(recommended loading setting: Size = 13.0, GlyphOffset.y = +1)
+<br>http://www.proggyfonts.net/
 
-ProggyTiny.ttf
-  Copyright (c) 2004, 2005 Tristan Grimmer
-  MIT License
-  recommended loading setting: Size = 10.0, DisplayOffset.Y = +1
-  http://www.proggyfonts.net/
+**ProggyTiny.ttf**, by Tristan Grimmer
+<br>MIT License
+<br>(recommended loading setting: Size = 10.0, GlyphOffset.y = +1)
+<br>http://www.proggyfonts.net/
 
-Karla-Regular.ttf
-  Copyright (c) 2012, Jonathan Pinhorn
-  SIL OPEN FONT LICENSE Version 1.1
-```
+**Karla-Regular.ttf**, by Jonathan Pinhorn
+<br>SIL OPEN FONT LICENSE Version 1.1
 
 ##### [Return to Index](#index)
 
